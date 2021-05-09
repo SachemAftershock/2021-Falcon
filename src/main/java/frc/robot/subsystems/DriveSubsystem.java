@@ -2,8 +2,8 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
+import com.ctre.phoenix.motorcontrol.InvertType;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DutyCycle;
@@ -39,8 +39,8 @@ public class DriveSubsystem extends AftershockSubsystem {
 
     private static DriveSubsystem mInstance;
 
-    private final WPI_TalonSRX mDriveMotorPortA, mDriveMotorPortB;
-    private final WPI_TalonSRX mDriveMotorStarboardA, mDriveMotorStarboardB;
+    private final WPI_TalonFX mDriveMotorPortA, mDriveMotorPortB;
+    private final WPI_TalonFX mDriveMotorStarboardA, mDriveMotorStarboardB;
     private double mEncoderVelocityConversionFactor;
     private final DifferentialDrive mDifferentialDrive;
     private final DifferentialDriveKinematics mKinematics;
@@ -75,27 +75,27 @@ public class DriveSubsystem extends AftershockSubsystem {
         //I'm only this thorough with Spark initialization because I saw a thread on Chief Delphi 
         //that Spark MAXs reset to the settings burned into the flash memory if they lose power
         //Make sure configure each spark to be brushless, since the setMotorType was depricated.
-        mDriveMotorPortA = new WPI_TalonSRX(DriveConstants.kDriveMotorPortAId);
-        // mDriveMotorPortA.setOpenLoopRampRate(DriveConstants.kRampRateToMaxSpeed);
+        mDriveMotorPortA = new WPI_TalonFX(DriveConstants.kDriveMotorPortAId);
+        mDriveMotorPortA.configFactoryDefault();
         mDriveMotorPortA.setNeutralMode(NeutralMode.Brake);
         mDriveMotorPortA.setInverted(false);
 
-        mDriveMotorPortB = new WPI_TalonSRX(DriveConstants.kDriveMotorPortBId);
-        // mDriveMotorPortB.setOpenLoopRampRate(DriveConstants.kRampRateToMaxSpeed);
+        mDriveMotorPortB = new WPI_TalonFX(DriveConstants.kDriveMotorPortBId);
+        mDriveMotorPortB.configFactoryDefault();
         mDriveMotorPortB.setNeutralMode(NeutralMode.Brake);
-        mDriveMotorPortB.setInverted(false);
         mDriveMotorPortB.follow(mDriveMotorPortA);
+        mDriveMotorPortB.setInverted(InvertType.FollowMaster);
 
-        mDriveMotorStarboardA = new WPI_TalonSRX(DriveConstants.kDriveMotorStarboardAId);
-        // mDriveMotorStarboardA.setOpenLoopRampRate(DriveConstants.kRampRateToMaxSpeed);
+        mDriveMotorStarboardA = new WPI_TalonFX(DriveConstants.kDriveMotorStarboardAId);
+        mDriveMotorPortA.configFactoryDefault();
         mDriveMotorStarboardA.setNeutralMode(NeutralMode.Brake);
-        mDriveMotorStarboardA.setInverted(false);
+        mDriveMotorStarboardA.setInverted(false); //TODO shouldn't one these inverted be true?
 
-        mDriveMotorStarboardB = new WPI_TalonSRX(DriveConstants.kDriveMotorStarboardBId);
-        // mDriveMotorStarboardB.setOpenLoopRampRate(DriveConstants.kRampRateToMaxSpeed);
+        mDriveMotorStarboardB = new WPI_TalonFX(DriveConstants.kDriveMotorStarboardBId);
+        mDriveMotorPortB.configFactoryDefault();
         mDriveMotorStarboardB.setNeutralMode(NeutralMode.Brake);
-        mDriveMotorStarboardB.setInverted(false);
         mDriveMotorStarboardB.follow(mDriveMotorStarboardA);
+        mDriveMotorStarboardB.setInverted(InvertType.FollowMaster);
 
         mDifferentialDrive = new DifferentialDrive(mDriveMotorPortA, mDriveMotorStarboardA);
         addChild("Differential Drive", mDifferentialDrive);
