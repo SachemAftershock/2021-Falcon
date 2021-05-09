@@ -4,11 +4,22 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.lib.AftershockXboxController;
+import frc.robot.Constants.ControllerConstants;
+import frc.robot.commands.drive.ManualDriveCommand;
+import frc.robot.commands.drive.RotateDriveCommand;
+import frc.robot.commands.drive.ToggleCollisionAvoidanceCommand;
+import frc.robot.commands.drive.ToggleDrivebaseGearingCommand;
+import frc.robot.commands.drive.ToggleManualDriveInversionCommand;
+import frc.robot.commands.drive.TogglePrecisionDrivingCommand;
+import frc.robot.subsystems.CollisionAvoidanceSubsystem;
+import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.PowerSubsystem;
+import frc.lib.SubsystemManager;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -17,32 +28,139 @@ import edu.wpi.first.wpilibj2.command.Command;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
-  private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
+  private static RobotContainer mInstance;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
-    // Configure the button bindings
-    configureButtonBindings();
+  private final AftershockXboxController mControllerPrimary = new AftershockXboxController(ControllerConstants.kControllerPrimaryId);
+  private final AftershockXboxController mControllerSecondary = new AftershockXboxController(ControllerConstants.kControllerSecondaryId);
+
+  private final CollisionAvoidanceSubsystem mCollisionAvoidance = CollisionAvoidanceSubsystem.getInstance();
+  private final DriveSubsystem mDrive = DriveSubsystem.getInstance();
+  private final PowerSubsystem mPower = PowerSubsystem.getInstance();
+
+  private final SubsystemManager mSubsystemManager;
+
+  // Primary Controller
+  private JoystickButton bToggleDriveGear;
+  private JoystickButton bToggleDriveInversion;
+  private JoystickButton bToggleCollisionAvoidance;
+  private JoystickButton bTogglePrecisionDrive;
+  private JoystickButton bClearCommandQueuePrimary;
+
+  // Secondary Controller
+  private boolean isLowPowerMode;
+  private boolean lastPowerMode;
+  private JoystickButton bClearCommandQueueSecondary;
+  private JoystickButton bDeployIntake;
+  private JoystickButton bRetractIntake;
+  private JoystickButton bEjectIntake;
+  private JoystickButton bIngestIntake;
+  private JoystickButton bArm;
+
+  private int iterationCounter;
+  private final int kMaxIterations = 5000 / 20;
+
+  /**
+   * Constructor for RobotCotainer Class
+   */
+  private RobotContainer() {
+      mSubsystemManager = SubsystemManager.getInstance();
+      mSubsystemManager.setSubsystems(
+          mCollisionAvoidance,
+          mDrive,
+          mPower
+      );
+
+      isLowPowerMode = false; // Robot starts in On mode (not low power)
+      lastPowerMode = !isLowPowerMode; // Set so first trigger detection will cause toggle of mode.
+
+      configureButtonBindings();
+      CommandScheduler.getInstance().setDefaultCommand(mDrive, new ManualDriveCommand(mDrive, mControllerPrimary));
+
+      iterationCounter = kMaxIterations;
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   * RobotContainer Initialization, Runs at Robot Powered On
    */
-  private void configureButtonBindings() {}
+  public void initialize() {
+    mSubsystemManager.initialize();
+}
+
+/**
+   * Maps Buttons on Primary & Secondary Controllers to Commands
+   */
+  private void configureButtonBindings() {
+
+      // PRIMARY CONTROLLER
+
+      bToggleDriveGear = new JoystickButton(mControllerPrimary, XboxController.Button.kA.value);
+      bToggleDriveGear.whenPressed(new ToggleDrivebaseGearingCommand(mDrive));
+
+      bTogglePrecisionDrive = new JoystickButton(mControllerPrimary, XboxController.Button.kX.value);
+      bTogglePrecisionDrive.whenPressed(new TogglePrecisionDrivingCommand(mDrive));
+
+      bToggleDriveInversion = new JoystickButton(mControllerPrimary, XboxController.Button.kB.value);
+      bToggleDriveInversion.whenPressed(new ToggleManualDriveInversionCommand(mDrive));
+
+      bToggleCollisionAvoidance = new JoystickButton(mControllerPrimary, XboxController.Button.kBack.value);
+      bToggleCollisionAvoidance.whenPressed(new ToggleCollisionAvoidanceCommand(mCollisionAvoidance, mControllerPrimary));
+
+      bClearCommandQueuePrimary = new JoystickButton(mControllerPrimary, XboxController.Button.kStart.value);
+      bClearCommandQueuePrimary.whenPressed(new InstantCommand(() -> CommandScheduler.getInstance().cancelAll()));
+
+      // SECONDARY CONTROLLER
+
+      bClearCommandQueueSecondary = new JoystickButton(mControllerSecondary, XboxController.Button.kStart.value);
+      bClearCommandQueueSecondary.whenPressed(new InstantCommand(() -> CommandScheduler.getInstance().cancelAll()));
+
+    }
+
 
   /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
+   * Checks Button Status Periodically to execute Commands
+   * <p>
+   * Used for non-traditional buttons (D-Pad,Triggers)
    */
-  public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return m_autoCommand;
+  public void periodic() {
+
+    // While not auto-rotating, D-Pad can be used to command to 8 direction robot angle.
+    if(mControllerPrimary.getDPadPressed() && !mDrive.isAutoRotateRunning()) {
+        CommandScheduler.getInstance().schedule(new RotateDriveCommand(mDrive, mControllerPrimary.getDPadAngle()));
+    }
+
+    if (--iterationCounter <= 0) {
+        mSubsystemManager.outputTelemetry();
+        iterationCounter = kMaxIterations;
+    }
+  }
+    
+  /**
+    * Gets Xbox Controller for the Primary Driver, tasked with driving the robot
+    * 
+    * @return Primary Xbox Controller
+    */
+  public AftershockXboxController getControllerPrimary() {
+        return mControllerPrimary;
+  }
+
+  /**
+   * Gets Xbox Controller for the Secondary Driver, tasked with controlling all mechanisms
+   * 
+   * @return Secondary Xbox Controller
+   */
+  public AftershockXboxController getControllerSecondary() {
+      return mControllerSecondary;
+  }
+
+  /**
+   * @return RobotContainer Singleton Instance
+   */
+  public synchronized static RobotContainer getInstance() {
+      if(mInstance == null) {
+          mInstance = new RobotContainer();
+      }
+      return mInstance;
   }
 }
+
