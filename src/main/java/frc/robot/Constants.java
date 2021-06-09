@@ -88,10 +88,10 @@ public final class Constants {
     }
     
     public static final class DriveConstants {
-        public static final int kDriveMotorPortAId = RioPortConstants.CanAddresses.eCanAddress1.getValue();
-        public static final int kDriveMotorPortBId = RioPortConstants.CanAddresses.eCanAddress2.getValue();
-        public static final int kDriveMotorStarboardAId = RioPortConstants.CanAddresses.eCanAddress4.getValue();
-        public static final int kDriveMotorStarboardBId = RioPortConstants.CanAddresses.eCanAddress5.getValue();
+        public static final int kDriveMotorPortAId = RioPortConstants.CanAddresses.eCanAddress2.getValue();
+        public static final int kDriveMotorPortBId = RioPortConstants.CanAddresses.eCanAddress3.getValue();
+        public static final int kDriveMotorStarboardAId = RioPortConstants.CanAddresses.eCanAddress0.getValue();
+        public static final int kDriveMotorStarboardBId = RioPortConstants.CanAddresses.eCanAddress1.getValue();
 
         public static final double kManualDriveRotationScaleFactor = 0.8;
         
