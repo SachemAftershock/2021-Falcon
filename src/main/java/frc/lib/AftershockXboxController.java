@@ -9,7 +9,8 @@ import edu.wpi.first.wpilibj.XboxController;
  */
 public class AftershockXboxController extends XboxController {
 
-    private final double kJoystickDeadbandTolerance = 0.15;
+    private final double kJoystickDeadbandToleranceX = 0.15;
+    private final double kJoystickDeadbandToleranceY = 0.15;
     private final double kTriggerDeadbandTolerance =  0.15;
 
     private LatchedBoolean mLeftTriggerPressed;
@@ -26,6 +27,14 @@ public class AftershockXboxController extends XboxController {
         mRightTriggerPressed = new LatchedBoolean();
     }
 
+    public double getkJoystickDeadbandToleranceX() {
+        return kJoystickDeadbandToleranceX;
+    }
+
+    public double getkJoystickDeadbandToleranceY() {
+        return kJoystickDeadbandToleranceY;
+    }
+
     /**
      * Gets X axis value on selected Joystick with deadband applied
      * 
@@ -34,7 +43,7 @@ public class AftershockXboxController extends XboxController {
      * @return X Axis Value of Selected Joystick with deadband applied
      */
     public double getDeadbandX(Hand hand) {
-        return Util.deadband(this.getX(hand), kJoystickDeadbandTolerance);
+        return Util.deadband(this.getX(hand), kJoystickDeadbandToleranceX);
     }
 
     /**
@@ -45,7 +54,7 @@ public class AftershockXboxController extends XboxController {
      * @return Y Axis Value of Selected Joystick with deadband applied
      */
     public double getDeadbandY(Hand hand) {
-        return Util.deadband(this.getY(hand), kJoystickDeadbandTolerance);
+        return Util.deadband(this.getY(hand), kJoystickDeadbandToleranceY);
     }
 
     /**
