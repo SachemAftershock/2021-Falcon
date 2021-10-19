@@ -60,18 +60,38 @@ public class ManualDriveCommand extends CommandBase {
     }
 
     private double ShapeStraight(double pow){
+      //Uses two sections of linear shaping for acceleration (explain better here later)
+      double power = pow;
+      
+      double deadband = mController.getkJoystickDeadbandToleranceY();
 
-      // compute an exponential function that lowers close to zero, then rapidly increaseds close to 1
-      // This should be more precise since it is the actual funtion the polynomial coeeficients were computer for, which are thus approxiations. 
-      double theExponent = 4.0;  // range 1.0 to 10.0
-      double theTargetMatchScale = 1.0;  // range 0.1 to 1.0
-
-      if (Math.abs(pow) <  mController.getkJoystickDeadbandToleranceY())
-        return 0.0;
-      if (pow >= 0.0)
-        return (Math.pow(Math.exp(pow-mController.getkJoystickDeadbandToleranceY()),theExponent)-1)/(Math.pow(Math.exp(1-mController.getkJoystickDeadbandToleranceY()),theExponent)-1)*theTargetMatchScale;
-      else
-        return -((Math.pow(Math.exp(-(pow-mController.getkJoystickDeadbandToleranceY())),theExponent)-1)/(Math.pow(Math.exp(1-mController.getkJoystickDeadbandToleranceY()),theExponent)-1))*theTargetMatchScale;
-  }
-
+      if(power > 0.0){
+        if(power < deadband){
+          //double deadband = 0.0;
+          return 0.0;
+        }
+        else if(power < 0.70 && power > deadband){
+          //double shapeTurnConstant = 0.50;
+          return 0.70;
+        }
+        else{
+          return 1.0;
+        }
+      }
+      else if(power < 0.0){
+        if(power > deadband){
+          return 0.0;
+        }
+        else if(power < 0.70 && power > deadband){
+          return -0.70;
+        }
+        else{
+          return -1.0;
+        }
+      }
+      return 0.0;
+    }
+    
+  
 }
+
