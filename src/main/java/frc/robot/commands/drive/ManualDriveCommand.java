@@ -126,13 +126,13 @@ public class ManualDriveCommand extends CommandBase {
         */
 
         if(power < 0.0){
-          if(power < deadband) {
+          if(power < -deadband) {
             return 0.0;
           }
-          if(power <= stageOne && power > deadband) {
+          if(power <= stageOne && power > -deadband) {
             return -highPowerDampening;
           }
-          if(power > stageOne && power <= stageTwo && power > deadband) {
+          if(power > stageOne && power <= stageTwo && power > -deadband) {
             return -mediumPowerDampening;
           }
           if(power > stageTwo && power <= stageThree) {
