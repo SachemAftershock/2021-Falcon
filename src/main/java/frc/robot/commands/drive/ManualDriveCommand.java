@@ -60,38 +60,90 @@ public class ManualDriveCommand extends CommandBase {
     }
 
     private double ShapeStraight(double pow){
-      //Uses two sections of linear shaping for acceleration (explain better here later)
-      double power = pow;
-      
-      double deadband = mController.getkJoystickDeadbandToleranceY();
 
-      if(power > 0.0){
-        if(power < deadband){
-          //double deadband = 0.0;
-          return 0.0;
+      /*
+        Uses a linear system to apply a multiplyer to the inputed throttle in order to 
+        dampen rapid changes in accleration
+      */
+
+        double power = pow;
+        double deadband = mController.getkJoystickDeadbandToleranceY();
+        
+        /*
+          4 levels of power dampening applied based on inputed throttle
+          The values are not final and can and should be tuned to meet the requirements of the robot
+        */
+        double highPowerDampening = 0.25;
+        double mediumPowerDampening = 0.50;
+        double lowPowerDampening = 0.75;
+        double noPowerDampening = 1.0;
+
+        /*
+          Ranges for inputed throttle
+          Can be tuned in conjunction to the power dampening levels to create smooth acceleration
+        */
+        double stageOne = 0.50;
+        double stageTwo = 0.80;
+        double stageThree = 0.90;
+        double stageFour = 1.0;
+
+        /*
+          Up to 50 percent throttle has high power dampening applied to it, meaning the motors are only 
+          commanded to 25 percent of the throttle inputed
+
+          Up to 80 percent throttle has medium power dampening applied to it, meaning the motors are only
+          commanded to 50 percent of the throttle inputed
+
+          Up to 90 percent throttle has low power dampening applied to it, meaning the motors are commanded
+          to 75 percent of the inputed throttle
+
+          When 90 percent to 100 percent throttle is applied there is no power dampening
+
+          The deadband of up to 15 percent is accounted for
+        */
+
+        if(power > 0.0){
+          if(power < deadband) {
+            return 0.0;
+          }
+          if(power <= stageOne && power > deadband) {
+            return highPowerDampening;
+          }
+          if(power > stageOne && power <= stageTwo && power > deadband) {
+            return mediumPowerDampening;
+          }
+          if(power > stageTwo && power <= stageThree) {
+            return lowPowerDampening; 
+          }
+          if(power > stageThree && power == stageFour) {
+            return noPowerDampening;
+          }
         }
-        else if(power < 0.70 && power > deadband){
-          //double shapeTurnConstant = 0.50;
-          return 0.70;
+
+        /*
+          Figure out which values need to returned as negative, and wether to use < or >
+          Going backwards might, and might not work because of this
+        */
+
+        if(power < 0.0){
+          if(power < deadband) {
+            return 0.0;
+          }
+          if(power <= stageOne && power > deadband) {
+            return -highPowerDampening;
+          }
+          if(power > stageOne && power <= stageTwo && power > deadband) {
+            return -mediumPowerDampening;
+          }
+          if(power > stageTwo && power <= stageThree) {
+            return -lowPowerDampening; 
+          }
+          if(power > stageThree && power == stageFour) {
+            return -noPowerDampening;
+          }
         }
-        else{
-          return 1.0;
-        }
-      }
-      else if(power < 0.0){
-        if(power > deadband){
-          return 0.0;
-        }
-        else if(power < 0.70 && power > deadband){
-          return -0.70;
-        }
-        else{
-          return -1.0;
-        }
-      }
-      return 0.0;
+
+        return 0;
     }
-    
-  
 }
 
