@@ -12,6 +12,7 @@ public class ToggleDrivebaseGearingCommand extends InstantCommand {
         addRequirements(mDrive);
     }
 
+    /*
     @Override
     public void execute() {
         if(mDrive.isHighGear()) {
@@ -21,4 +22,5 @@ public class ToggleDrivebaseGearingCommand extends InstantCommand {
         }
         System.out.println("ToggleDrivebaseGearingCommand: High Gear: " + mDrive.isHighGear());
     }
+    */
 }

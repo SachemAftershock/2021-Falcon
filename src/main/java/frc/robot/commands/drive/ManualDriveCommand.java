@@ -45,47 +45,35 @@ public class ManualDriveCommand extends CommandBase {
      * The functions (or coefficients) were computed using Excel spreadsheet.
      */
     private double ShapeTurn(double rot){
-
-        // compute an exponential function that lowers close to zero, then rapidly increaseds close to 1
-        // This should be more precise since it is the actual funtion the polynomial coeeficients were computer for, which are thus approxiations. 
-        double theExponent = 4.0;  // range 1.0 to 10.0
-        double theTargetMatchScale = 1.0;  // range 0.1 to 1.0
-
-        if (Math.abs(rot) <  mController.getkJoystickDeadbandToleranceX())
-          return 0.0;
-        if (rot >= 0.0)
-          return (Math.pow(Math.exp(rot-mController.getkJoystickDeadbandToleranceX()),theExponent)-1)/(Math.pow(Math.exp(1-mController.getkJoystickDeadbandToleranceX()),theExponent)-1)*theTargetMatchScale;
-        else
-          return -((Math.pow(Math.exp(-(rot-mController.getkJoystickDeadbandToleranceX())),theExponent)-1)/(Math.pow(Math.exp(1-mController.getkJoystickDeadbandToleranceX()),theExponent)-1))*theTargetMatchScale;
-    }
-
-    private double ShapeStraight(double pow){
-
       /*
         Uses a linear system to apply a multiplyer to the inputed throttle in order to 
         dampen rapid changes in accleration
       */
 
-        double power = pow;
-        double deadband = mController.getkJoystickDeadbandToleranceY();
+        double power = rot;
+        double deadband = mController.getkJoystickDeadbandToleranceX();
         
         /*
           4 levels of power dampening applied based on inputed throttle
           The values are not final and can and should be tuned to meet the requirements of the robot
         */
-        double highPowerDampening = 0.25;
-        double mediumPowerDampening = 0.50;
-        double lowPowerDampening = 0.75;
-        double noPowerDampening = 1.0;
+        double highPowerDampening = 0.15;//0.25;
+        double mediumHighPowerDampening = 0.20;
+        double mediumPowerDampening = 0.25;//0.50;
+        double mediumLowPowerDampening = 0.30;
+        double lowPowerDampening = 0.35;//0.75;
+        double noPowerDampening = 0.40;//1.0;
 
         /*
           Ranges for inputed throttle
           Can be tuned in conjunction to the power dampening levels to create smooth acceleration
         */
-        double stageOne = 0.50;
-        double stageTwo = 0.80;
-        double stageThree = 0.90;
-        double stageFour = 1.0;
+        double stageOne = 0.30;
+        double stageTwo = 0.50;
+        double stageThree = 0.70;
+        double stageFour = 0.80;
+        double stageFive = 0.90;
+        double stageSix = 1.0;
 
         /*
           Up to 50 percent throttle has high power dampening applied to it, meaning the motors are only 
@@ -107,16 +95,22 @@ public class ManualDriveCommand extends CommandBase {
             return 0.0;
           }
           if(power <= stageOne && power > deadband) {
-            return highPowerDampening;
+            return power*highPowerDampening;
           }
-          if(power > stageOne && power <= stageTwo && power > deadband) {
-            return mediumPowerDampening;
+          if(power > stageOne && power <= stageTwo) {
+            return power*mediumHighPowerDampening;
           }
           if(power > stageTwo && power <= stageThree) {
-            return lowPowerDampening; 
+            return power*mediumPowerDampening; 
           }
-          if(power > stageThree && power == stageFour) {
-            return noPowerDampening;
+          if(power > stageThree || power <= stageFour) {
+            return power*mediumLowPowerDampening;
+          }
+          if(power > stageFour || power <= stageFive) {
+            return power*lowPowerDampening;
+          }
+          if(power > stageFive || power == stageSix) {
+            return power*noPowerDampening;
           }
         }
 
@@ -124,22 +118,132 @@ public class ManualDriveCommand extends CommandBase {
           Figure out which values need to returned as negative, and wether to use < or >
           Going backwards might, and might not work because of this
         */
-
+        
         if(power < 0.0){
-          if(power < -deadband) {
+          if(power > -deadband) {
             return 0.0;
           }
-          if(power <= stageOne && power > -deadband) {
-            return -highPowerDampening;
+          if(power >= -stageOne && power < -deadband) {
+            return power*highPowerDampening;
           }
-          if(power > stageOne && power <= stageTwo && power > -deadband) {
-            return -mediumPowerDampening;
+          if(power < -stageOne && power >= -stageTwo) {
+            return power*mediumHighPowerDampening;
+          }
+          if(power < -stageTwo && power >= -stageThree) {
+            return power*mediumPowerDampening; 
+          }
+          if(power < -stageThree || power >= -stageFour) {
+            return power*mediumLowPowerDampening;
+          }
+          if(power < -stageFour || power >= -stageFive) {
+            return power*lowPowerDampening;
+          }
+          if(power < -stageFive || power == -stageSix) {
+            return power*noPowerDampening;
+          }
+        }
+
+        return 0;
+        
+    }
+
+    private double ShapeStraight(double pow){
+
+      /*
+        Uses a linear system to apply a multiplyer to the inputed throttle in order to 
+        dampen rapid changes in accleration
+      */
+
+        double power = pow;
+        double deadband = mController.getkJoystickDeadbandToleranceY();
+        
+        /*
+          4 levels of power dampening applied based on inputed throttle
+          The values are not final and can and should be tuned to meet the requirements of the robot
+        */
+        double highPowerDampening = 0.15;//0.25;
+        double mediumHighPowerDampening = 0.20;
+        double mediumPowerDampening = 0.25;//0.50;
+        double mediumLowPowerDampening = 0.30;
+        double lowPowerDampening = 0.35;//0.75;
+        double noPowerDampening = 0.40;//1.0;
+
+        /*
+          Ranges for inputed throttle
+          Can be tuned in conjunction to the power dampening levels to create smooth acceleration
+        */
+        double stageOne = 0.30;
+        double stageTwo = 0.50;
+        double stageThree = 0.70;
+        double stageFour = 0.80;
+        double stageFive = 0.90;
+        double stageSix = 1.0;
+
+        /*
+          Up to 50 percent throttle has high power dampening applied to it, meaning the motors are only 
+          commanded to 25 percent of the throttle inputed
+
+          Up to 80 percent throttle has medium power dampening applied to it, meaning the motors are only
+          commanded to 50 percent of the throttle inputed
+
+          Up to 90 percent throttle has low power dampening applied to it, meaning the motors are commanded
+          to 75 percent of the inputed throttle
+
+          When 90 percent to 100 percent throttle is applied there is no power dampening
+
+          The deadband of up to 15 percent is accounted for
+        */
+
+        if(power > 0.0){
+          if(power < deadband) {
+            return 0.0;
+          }
+          if(power <= stageOne && power > deadband) {
+            return power*highPowerDampening;
+          }
+          if(power > stageOne && power <= stageTwo) {
+            return power*mediumHighPowerDampening;
           }
           if(power > stageTwo && power <= stageThree) {
-            return -lowPowerDampening; 
+            return power*mediumPowerDampening; 
           }
-          if(power > stageThree && power == stageFour) {
-            return -noPowerDampening;
+          if(power > stageThree || power <= stageFour) {
+            return power*mediumLowPowerDampening;
+          }
+          if(power > stageFour || power <= stageFive) {
+            return power*lowPowerDampening;
+          }
+          if(power > stageFive || power == stageSix) {
+            return power*noPowerDampening;
+          }
+        }
+
+        /*
+          Figure out which values need to returned as negative, and wether to use < or >
+          Going backwards might, and might not work because of this
+        */
+        
+        if(power < 0.0){
+          if(power > -deadband) {
+            return 0.0;
+          }
+          if(power >= -stageOne && power < -deadband) {
+            return power*highPowerDampening;
+          }
+          if(power < -stageOne && power >= -stageTwo) {
+            return power*mediumHighPowerDampening;
+          }
+          if(power < -stageTwo && power >= -stageThree) {
+            return power*mediumPowerDampening; 
+          }
+          if(power < -stageThree || power >= -stageFour) {
+            return power*mediumLowPowerDampening;
+          }
+          if(power < -stageFour || power >= -stageFive) {
+            return power*lowPowerDampening;
+          }
+          if(power < -stageFive || power == -stageSix) {
+            return power*noPowerDampening;
           }
         }
 
