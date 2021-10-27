@@ -136,10 +136,10 @@ public class ManualDriveCommand extends CommandBase {
             return power*mediumLowPowerDampening;
           }
           if(power < -stageFour || power >= -stageFive) {
-            return power*lowPowerDampening;
+            return -power*lowPowerDampening;
           }
           if(power < -stageFive || power == -stageSix) {
-            return power*noPowerDampening;
+            return -power*noPowerDampening;
           }
         }
 
