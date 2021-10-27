@@ -45,7 +45,7 @@ public class DriveSubsystem extends AftershockSubsystem {
     private final DifferentialDrive mDifferentialDrive;
     private final DifferentialDriveKinematics mKinematics;
     private final DifferentialDriveOdometry mOdometry;
-    private final DoubleSolenoid mGearShifter;
+    //private final DoubleSolenoid mGearShifter;
     private final PID mPortPid, mStarboardPid, mRotatePid;
     private final AHRS mNavx;
     private final Boolean sendTeLemetry = false;
@@ -118,8 +118,8 @@ public class DriveSubsystem extends AftershockSubsystem {
         //TODO: Need some way to make the start position field-centric instead of robot-centric
         //maybe lidars pointed against 2 walls?
                 
-        mGearShifter = new DoubleSolenoid(PneumaticConstants.kPcm0Id, DriveConstants.kGearShiftForwardId, DriveConstants.kGearShiftReverseId);
-        addChild("Gear Shift Double Solenoid", mGearShifter);    
+        //mGearShifter = new DoubleSolenoid(PneumaticConstants.kPcm0Id, DriveConstants.kGearShiftForwardId, DriveConstants.kGearShiftReverseId);
+        //addChild("Gear Shift Double Solenoid", mGearShifter);    
 
         mPortPid = new PID();
         mStarboardPid = new PID();
@@ -150,7 +150,7 @@ public class DriveSubsystem extends AftershockSubsystem {
         //Need a way to find robot position on field, not just assume we start at 0,0
         //See above todo next to mOdometry initializtion
         mOdometry.resetPosition(new Pose2d(), new Rotation2d(getHeading()));
-        shiftLowGear();
+        //shiftLowGear();
     }
 
     @Override
@@ -345,19 +345,23 @@ public class DriveSubsystem extends AftershockSubsystem {
         }
     }
 
+    /*
     public void shiftHighGear() {
         mGearShifter.set(Value.kForward);
         if(mInPrecisionMode) {
             togglePrecisionDriving();
         }
     }
+    */
 
+    /*
     public void shiftLowGear() {
         mGearShifter.set(Value.kReverse);
         if(mInPrecisionMode) {
             togglePrecisionDriving();
         }
     }
+    */
 
     public void invertManualDrive() {
         mManualDriveInverted = true;
@@ -377,7 +381,8 @@ public class DriveSubsystem extends AftershockSubsystem {
      * @return <i> true </i> when Gear Solenoid is Forward, i.e in High Gear; <i> false </i> otherwise
      */
     public synchronized boolean isHighGear() {
-        return mGearShifter.get() == Value.kForward;
+        //return mGearShifter.get() == Value.kForward;
+        return false;
     }
 
     /**

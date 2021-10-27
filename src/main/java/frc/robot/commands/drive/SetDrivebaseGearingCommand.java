@@ -17,9 +17,9 @@ public class SetDrivebaseGearingCommand extends InstantCommand {
     @Override
     public void execute() {
         if(mHighGear) {
-            mDrive.shiftHighGear();
+            //mDrive.shiftHighGear();
         } else {
-            mDrive.shiftLowGear();
+            //mDrive.shiftLowGear();
         }
         System.out.println("SetDrivebaseGearingCommand: Precision: " + mHighGear);
     }

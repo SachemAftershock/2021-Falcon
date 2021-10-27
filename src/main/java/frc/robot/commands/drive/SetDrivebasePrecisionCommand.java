@@ -17,9 +17,9 @@ public class SetDrivebasePrecisionCommand extends InstantCommand {
     @Override
     public void execute() {
         if(mPrecision) {
-            mDrive.shiftHighGear();   //TODO this looks wrong. Should be precision functions, not gears
+            //mDrive.shiftHighGear();   //TODO this looks wrong. Should be precision functions, not gears
         } else {
-            mDrive.shiftLowGear();
+            //mDrive.shiftLowGear();
         }
         System.out.println("SetDrivebasePrecisionCommand: Precision: " + mPrecision);
     }
