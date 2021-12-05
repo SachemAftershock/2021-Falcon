@@ -15,6 +15,7 @@ public class ManualDriveCommand extends CommandBase {
  
     private DriveSubsystem mDrive;
     private AftershockXboxController mController;
+    private boolean secondaryDriveControlls = mController.getDPadRight();
 
     /**
      * Constructor for ManualDriveCommand Class
@@ -33,13 +34,25 @@ public class ManualDriveCommand extends CommandBase {
     
     @Override
     public void execute() {
-        final double pow = accelerationLimiter.linearShapeStraight(mController.getDeadbandY(Hand.kLeft));
-        final double rot = accelerationLimiter.linearShapeTurn(mController.getDeadbandX(Hand.kRight));
-        final boolean leftTriggerPressed = mController.getTriggerHeld(Hand.kLeft);
-        final boolean rightTriggerPressed = mController.getTriggerHeld(Hand.kRight);
-        final boolean wantDeccelerate = leftTriggerPressed || rightTriggerPressed;
-        mDrive.manualDrive(pow, rot, wantDeccelerate);
         
+
+        if(secondaryDriveControlls){
+            final double forward = accelerationLimiter.linearShapeStraight(mController.getTriggerAxis(Hand.kRight));
+            final double backward = accelerationLimiter.linearShapeStraight(-(mController.getTriggerAxis(Hand.kLeft)));
+            final double pow = forward + backward;
+            final double rot = accelerationLimiter.linearShapeTurn(mController.getDeadbandX(Hand.kLeft));
+            mDrive.manualDrive(pow, rot, false /*wantDeccelerate*/);
+        }
+        
+        if(secondaryDriveControlls){
+            final double pow = accelerationLimiter.linearShapeStraight(mController.getDeadbandY(Hand.kLeft));
+            final double rot = accelerationLimiter.linearShapeTurn(mController.getDeadbandX(Hand.kRight));
+            final boolean leftTriggerPressed = mController.getTriggerHeld(Hand.kLeft);
+            final boolean rightTriggerPressed = mController.getTriggerHeld(Hand.kRight);
+            final boolean wantDeccelerate = leftTriggerPressed || rightTriggerPressed;
+            mDrive.manualDrive(pow, rot, wantDeccelerate);
+        }
+
     } 
 }
 
