@@ -128,6 +128,19 @@ public class AftershockXboxController extends XboxController {
         return this.getPOV() == DPadDirection.eRight.getAngle();
     }
 
+    private boolean pressed = false;
+    public boolean getDPadRightPressed(){
+        if(getDPadRight()){
+            if(pressed){
+                pressed = false;
+            }
+            else{
+                pressed = true;
+            }
+        }
+        return pressed;
+    }
+
     /**
      * Gets if Down-Right on the D-Pad is pressed
      * 
