@@ -15,7 +15,7 @@ public class ManualDriveCommand extends CommandBase {
  
     private DriveSubsystem mDrive;
     private AftershockXboxController mController;
-    private boolean secondaryDriveControlls = mController.getDPadRight(); 
+    private boolean secondaryDriveControlls = mController.getDPadRightPressed(); 
 
     /**
      * Constructor for ManualDriveCommand Class
