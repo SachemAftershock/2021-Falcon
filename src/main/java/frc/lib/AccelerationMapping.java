@@ -1,12 +1,16 @@
 package frc.lib;
 
+/**
+ * Acceleration Mapping class
+ * 
+ * @author Arhum Mudassir
+ */
 public class AccelerationMapping {
 
     /**
      * Constructor for AccelerationMapping Class
      */
     public AccelerationMapping(){
-
     }
     
     /**
