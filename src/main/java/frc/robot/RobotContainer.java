@@ -20,6 +20,7 @@ import frc.robot.subsystems.CollisionAvoidanceSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.PowerSubsystem;
 import frc.lib.SubsystemManager;
+import frc.robot.commands.drive.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -46,6 +47,7 @@ public class RobotContainer {
   private JoystickButton bToggleCollisionAvoidance;
   private JoystickButton bTogglePrecisionDrive;
   private JoystickButton bClearCommandQueuePrimary;
+  private JoystickButton bToggleDriveStyle;
 
   // Secondary Controller
   private boolean isLowPowerMode;
@@ -91,8 +93,9 @@ public class RobotContainer {
    * Maps Buttons on Primary & Secondary Controllers to Commands
    */
   private void configureButtonBindings() {
-
       // PRIMARY CONTROLLER
+
+      bToggleDriveStyle = new JoystickButton(mControllerPrimary, XboxController.Button.kY.value);
 
       bToggleDriveGear = new JoystickButton(mControllerPrimary, XboxController.Button.kA.value);
       bToggleDriveGear.whenPressed(new ToggleDrivebaseGearingCommand(mDrive));

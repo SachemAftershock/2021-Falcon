@@ -15,7 +15,7 @@ public class ManualDriveCommand extends CommandBase {
  
     private DriveSubsystem mDrive;
     private AftershockXboxController mController;
-    private boolean secondaryDriveControlls = mController.getDPadRightPressed(); 
+    AccelerationMapping accelerationLimiter;
 
     /**
      * Constructor for ManualDriveCommand Class
@@ -30,23 +30,22 @@ public class ManualDriveCommand extends CommandBase {
         addRequirements(mDrive);
     }
 
-    AccelerationMapping accelerationLimiter = new AccelerationMapping();
     
     @Override
     public void execute() {
-        
-
+        boolean secondaryDriveControlls = mController.getYButtonPressed(); 
+        //System.out.println(secondaryDriveControlls);
         if(secondaryDriveControlls){
-            final double forward = accelerationLimiter.linearShapeStraight(mController.getTriggerAxis(Hand.kRight));
-            final double backward = accelerationLimiter.linearShapeStraight(-(mController.getTriggerAxis(Hand.kLeft)));
+            final double forward = AccelerationMapping.linearShapeStraight(mController.getTriggerAxis(Hand.kRight), mController.getkJoystickDeadbandToleranceY());
+            final double backward = AccelerationMapping.linearShapeStraight(-(mController.getTriggerAxis(Hand.kLeft)), mController.getkJoystickDeadbandToleranceY());
             final double pow = forward + backward;
-            final double rot = accelerationLimiter.linearShapeTurn(mController.getDeadbandX(Hand.kLeft));
+            final double rot = AccelerationMapping.linearShapeTurn(mController.getDeadbandX(Hand.kLeft), mController.getkJoystickDeadbandToleranceX());
             mDrive.manualDrive(pow, rot, false /*wantDeccelerate*/);
         }
         
-        if(secondaryDriveControlls){
-            final double pow = accelerationLimiter.linearShapeStraight(mController.getDeadbandY(Hand.kLeft));
-            final double rot = accelerationLimiter.linearShapeTurn(mController.getDeadbandX(Hand.kRight));
+        if(!secondaryDriveControlls){
+            final double pow = AccelerationMapping.linearShapeStraight(mController.getDeadbandY(Hand.kLeft), mController.getkJoystickDeadbandToleranceY());
+            final double rot = AccelerationMapping.linearShapeTurn(mController.getDeadbandX(Hand.kRight), mController.getkJoystickDeadbandToleranceX());
             final boolean leftTriggerPressed = mController.getTriggerHeld(Hand.kLeft);
             final boolean rightTriggerPressed = mController.getTriggerHeld(Hand.kRight);
             final boolean wantDeccelerate = leftTriggerPressed || rightTriggerPressed;
