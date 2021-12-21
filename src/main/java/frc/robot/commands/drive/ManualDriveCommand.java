@@ -12,7 +12,7 @@ import frc.lib.AccelerationMapping;
  * @author Shreyas Prasad
  */
 public class ManualDriveCommand extends CommandBase {
- 
+    private boolean secondaryDriveControlls = false;
     private DriveSubsystem mDrive;
     private AftershockXboxController mController;
     AccelerationMapping accelerationLimiter;
@@ -28,13 +28,31 @@ public class ManualDriveCommand extends CommandBase {
         mDrive = drive;
         mController = controller;
         addRequirements(mDrive);
+        //boolean secondaryDriveControlls = mController.getYButtonPressed();
     }
 
     
     @Override
     public void execute() {
-        boolean secondaryDriveControlls = mController.getYButtonPressed(); 
-        //System.out.println(secondaryDriveControlls);
+        //boolean e = false;
+        //boolean secondaryDriveControlls = false; 
+        
+        if(secondaryDriveControlls != mController.getYButton()){
+            secondaryDriveControlls = true; 
+        }
+        else{
+            secondaryDriveControlls = false;
+        }
+        
+        
+/*
+        if(mController.getYButtonPressed()){
+            secondaryDriveControlls = false;
+        }
+*/
+
+        System.out.println(mController.getYButton());
+        System.out.println(secondaryDriveControlls);
         if(secondaryDriveControlls){
             final double forward = AccelerationMapping.linearShapeStraight(mController.getTriggerAxis(Hand.kRight), mController.getkJoystickDeadbandToleranceY());
             final double backward = AccelerationMapping.linearShapeStraight(-(mController.getTriggerAxis(Hand.kLeft)), mController.getkJoystickDeadbandToleranceY());
